@@ -1,28 +1,37 @@
 const express = require("express");
+const { WebpayPlus, Options, IntegrationApiKeys, Environment, IntegrationCommerceCodes } = require("transbank-sdk");
 const cors = require("cors");
-const Axios = require("axios");
-const { WebpayPlus, IntegrationCommerceCodes, IntegrationApiKeys, Environment, Options } = require("transbank-sdk");
 
 const app = express();
 
-app.set("port", 4000);
+app.set("port", process.env.PORT || 4000);
 app.use(cors());
 
-app.get("/webpay/create", async function(req, res) {
-  const wpOptions = new Options(IntegrationCommerceCodes.WEBPAY_PLUS, IntegrationApiKeys.WEBPAY, Environment.Integration)
-  const pito = new WebpayPlus.Transaction(wpOptions);
+app.get("/", (req, res) => {
+  return res.json({
+    message: "OK"
+  })
+  
+});
 
-  const dateNow = Date.now()
-  const buyOrder = `Product-Name-${dateNow}`
-  const sessionId = dateNow.toString();
-  const amount = 3000
-  const return_url = "http://localhost:3000"
+app.get("/webpay/create", async (req, res) => {
+  const txOptions = new Options(IntegrationCommerceCodes.WEBPAY_PLUS, IntegrationApiKeys.WEBPAY, Environment.Integration);
+  const tx = new WebpayPlus.Transaction(txOptions);
 
-  const response = await pito.create(buyOrder, sessionId, amount, return_url);
+  const buyOrder = `product-${Date.now()}`;
+  const sessionId = `session-${Date.now()}`
+  const amount = 4000;
+  const return_url = "http://localhost:3000/confirm";
 
-  return res.json(response)
+  const response = await tx.create(buyOrder, sessionId, amount, return_url);
+  return res.json({
+    message: "OK",
+    data: {
+      url: response.url,
+      token: response.token
+    }
+  })
+
 })
-
-app.get()
 
 module.exports = { app }

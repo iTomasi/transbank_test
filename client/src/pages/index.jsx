@@ -12,7 +12,9 @@ const Index = function() {
         "http://localhost:4000/webpay/create"
       );
 
-      const data = response.data;
+      const data = response.data.data;
+
+      console.log(data)
 
       setUrl(data.url);
       setToken(data.token);
